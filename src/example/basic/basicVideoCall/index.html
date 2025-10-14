@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="../../../assets/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Basic Video Call -- Agora</title>
+    <link rel="stylesheet" href="../../../assets/bootstrap.min.css" />
+    <link rel="stylesheet" href="../../../common/common.css" />
+    <!-- videoConsole UI 依赖 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Shippori+Mincho&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --primary-color: #be353b;
+        --secondary-color: #2d50a4;
+        --light-bg: #f5f1ee;
+        --dark-bg: #e8e1d9;
+        --text-color: #333;
+        --highlight: #f0a860;
+        --console-bg: #fff;
+        --border-radius: 8px;
+        --shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        --transition: all 0.3s ease;
+        --base-size: 1rem;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font-family: 'Noto Sans JP', sans-serif; background: var(--light-bg); color: var(--text-color); line-height: 1.6; font-size: var(--base-size); overflow: hidden; }
+      .layout-wrapper { max-width: 1440px; height: 100vh; display: flex; margin: 0 auto; position: relative; overflow: hidden; background-color: var(--light-bg); }
+      .japanese-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.05; background-image:
+        radial-gradient(circle at 10% 20%, #be353b 0%, transparent 20%),
+        radial-gradient(circle at 90% 40%, #2d50a4 0%, transparent 30%),
+        repeating-linear-gradient(45deg, #f5f1ee, #e8e1d9 1px, transparent 1px, transparent 50px);
+      }
+      .video-section { flex: 0 0 70%; padding: 2rem; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+      .video-container { position: relative; flex-grow: 1; border-radius: var(--border-radius); box-shadow: var(--shadow); background: url('https://images.unsplash.com/photo-1566514592705-96367384f3ab?ixlib=rb-4.0.3&auto=format&fit=crop&q=80') no-repeat center center/cover; overflow: hidden; }
+      .remote-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+      .local-video { position: absolute; bottom: 2rem; right: 2rem; width: 25%; max-width: 240px; height: calc(25% - 1rem); border-radius: var(--border-radius); border: 3px solid var(--console-bg); box-shadow: 0 0 15px rgba(0,0,0,0.3); z-index: 10; overflow: hidden; }
+      .video-overlay { position: absolute; bottom: 0; width: 100%; padding: 1.2rem 2rem; background: linear-gradient(transparent, rgba(0,0,0,0.7)); color: white; display: flex; justify-content: space-between; align-items: center; transition: var(--transition); z-index: 5; }
+      .user-info { display: flex; align-items: center; gap: 1rem; }
+      .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: url('https://images.unsplash.com/photo-1542044893-954066f6d17f?ixlib=rb-4.0.3&auto=format&fit=crop&q=80') no-repeat center/cover; }
+      .user-name { font-weight: 500; font-size: 1.1rem; }
+      .controls { display: flex; gap: 1rem; }
+      .control-btn { background: rgba(255,255,255,0.15); border: none; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; transition: var(--transition); backdrop-filter: blur(5px); }
+      .control-btn:hover { background: var(--primary-color); transform: scale(1.08); }
+      .console-section { flex: 0 0 30%; background: var(--console-bg); display: flex; flex-direction: column; padding: 2rem; border-left: 1px solid rgba(0,0,0,0.05); box-shadow: -5px 0 10px rgba(0,0,0,0.03); overflow: hidden; }
+      .console-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(0,0,0,0.05); }
+      .logo { width: 42px; height: 42px; }
+      .title { font-family: 'Shippori Mincho', serif; font-size: 1.6rem; font-weight: 700; color: var(--secondary-color); position: relative; display: inline-block; }
+      .title:after { content: ''; position: absolute; bottom: -5px; left: 0; width: 100%; height: 3px; background: var(--highlight); border-radius: 2px; }
+      .console-content { flex-grow: 1; overflow-y: auto; }
+      .steps-container { display: flex; flex-direction: column; gap: 1.2rem; }
+      .step { background: var(--light-bg); border-radius: var(--border-radius); padding: 1.5rem; transition: var(--transition); border-left: 3px solid var(--dark-bg); cursor: pointer; }
+      .step:hover { background: #f0f0f0; border-left-color: var(--highlight); transform: translateX(5px); }
+      .step-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; }
+      .step-number { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--light-bg); color: var(--primary-color); border: 1px solid var(--primary-color); border-radius: 50%; font-weight: 700; }
+      .step-title { font-weight: 700; color: var(--secondary-color); }
+      .step-content { color: #555; font-size: 0.95rem; }
+      @media (max-width: 1200px) { .layout-wrapper { flex-direction: column; height: auto; min-height: 100vh; } .video-section, .console-section { flex: 1; } .console-section { border-left: none; border-top: 1px solid rgba(0,0,0,0.05); } .local-video { width: 30%; } }
+      @media (max-width: 768px) { .layout-wrapper { --base-size: 0.9rem; } .controls { position: absolute; bottom: 0; left: 0; width: 100%; justify-content: center; padding: 1rem 0; background: rgba(0,0,0,0.7); } .local-video { width: 35%; } }
+      @media (max-width: 480px) { .local-video { width: 40%; height: 20%; } .video-section, .console-section { padding: 1rem; } }
+
+      /* Override: make remote video fill the entire big window */
+      .video-container #remote-playerlist { width: 100%; height: 100%; }
+      .video-container #remote-playerlist > div { width: 100%; height: 100%; }
+      .video-container #remote-playerlist .player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+      .video-container #remote-playerlist video,
+      .video-container #remote-playerlist canvas { width: 100% !important; height: 100% !important; object-fit: cover; }
+    </style>
+  </head>
+
+  <body>
+    <div class="layout-wrapper">
+      <div class="japanese-bg"></div>
+      
+      <!-- 左侧视频区域（重构） -->
+      <div class="video-section">
+        <div class="video-container">
+          <div id="remote-playerlist" class="remote-video"></div>
+          <div id="local-player" class="local-video">
+            <div class="card-text local-player-name" id="local-player-name"></div>
+          </div>
+          <div class="video-overlay">
+            <div class="user-info">
+              <div class="user-avatar"></div>
+              <div class="user-name">Welcome to the Convo AI World in Japan</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 右侧控制台（保留功能 ID 并视觉升级） -->
+      <div class="console-section">
+        <div class="console-header">
+          <img class="logo" id="console-logo" src="../../../assets/agora-logo-en.png" alt="Agora Logo" />
+          <h1 class="title">開発者コンソール</h1>
+        </div>
+        
+        <div class="console-content">
+          <div class="steps-container">
+            <div class="step">
+              <div class="step-header">
+                <div class="step-number">0</div>
+                <div class="step-title">RTC Configuration</div>
+              </div>
+              <div class="step-content">
+                <label class="form-label">Channel</label>
+                <input class="form-control" id="channel" type="text" placeholder="enter channel name" required />
+                <div class="mt-2">
+                  <label class="form-label">User ID</label>
+                  <input class="form-control" id="uid" type="text" onkeyup="this.value=this.value.replace(/[^0-9]/g,'')" onafterpaste="this.value=this.value.replace(/[^0-9]/g,'')" placeholder="Enter the user ID" value="10000" />
+                </div>
+                <div class="mt-2">
+                  <label class="form-label">Token(optional)</label>
+                  <input class="form-control" id="token" type="text" placeholder="Enter the user Token" />
+                </div>
+              </div>
+            </div>
+            
+            <div class="step">
+              <div class="step-header">
+                <div class="step-number">1</div>
+                <div class="step-title">Create AgoraRTC Client</div>
+              </div>
+              <div class="step-content">
+                <button type="button" id="step-create" class="btn btn-primary btn-sm">Create Client</button>
+              </div>
+            </div>
+            
+            <div class="step">
+              <div class="step-header">
+                <div class="step-number">2</div>
+                <div class="step-title">Join Channel</div>
+              </div>
+              <div class="step-content">
+                <button type="button" id="step-join" class="btn btn-primary btn-sm">Join Channel</button>
+              </div>
+            </div>
+            
+            <div class="step">
+              <div class="step-header">
+                <div class="step-number">3</div>
+                <div class="step-title">Create Track & Publish</div>
+              </div>
+              <div class="step-content">
+                <div class="form-check">
+                  <span class="form-check-label">Mirror Mode</span>
+                  <input class="form-check-input" type="checkbox" id="mirror-check" checked disabled />
+                </div>
+                <button type="button" id="step-publish" class="btn btn-primary btn-sm">Create Track & Publish</button>
+                <label class="form-label mt-2">Microphone</label>
+                <select class="form-select mic-list">
+                  <option value="Default">Default</option>
+                </select>
+                <label class="form-label mt-2">Camera</label>
+                <select class="form-select cam-list">
+                  <option value="Default">Default</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="step">
+              <div class="step-header">
+                <div class="step-number">4</div>
+                <div class="step-title">Join Agora Convo AI</div>
+              </div>
+              <div class="step-content">
+                <button type="button" id="start-convo-ai" class="btn btn-success btn-sm">Join Convo AI</button>
+              </div>
+            </div>
+            
+            <div class="step">
+              <div class="step-header">
+                <div class="step-number">5</div>
+                <div class="step-title">Subscribe & Play</div>
+              </div>
+              <div class="step-content">
+                <select class="form-select" id="remote-uid-select">
+                  <option value="" disabled>Please select remote userId</option>
+                </select>
+                <div class="mt-2 mb-2">
+                  <span class="form-check d-inline-block">
+                    <input class="form-check-input" type="checkbox" id="audio-check" checked />
+                    <label class="form-check-label" for="audio-check">Audio</label>
+                  </span>
+                  <span class="form-check d-inline-block ms-2">
+                    <input class="form-check-input" type="checkbox" id="video-check" checked />
+                    <label class="form-check-label" for="video-check">Video</label>
+                  </span>
+                </div>
+                <button type="button" id="step-subscribe" class="btn btn-primary btn-sm">Subscribe & Play</button>
+              </div>
+            </div>
+            
+            <div class="step">
+              <div class="step-header">
+                <div class="step-number">6</div>
+                <div class="step-title">Leave Channel</div>
+              </div>
+              <div class="step-content">
+                <button type="button" id="step-leave" class="btn btn-danger btn-sm" disabled>Leave Channel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div id="app-info"></div>
+      </div>
+    </div>
+
+    <script src="../../../assets/jquery-3.4.1.min.js"></script>
+    <script src="../../../assets/bootstrap.bundle.min.js"></script>
+    <script src="../../../common/constant.js"></script>
+    <script src="../../../common/utils.js"></script>
+    <script src="../../../common/left-menu.js"></script>
+    <script src="../../../i18n/language.js"></script>
+    <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+    <script src="./index.js"></script>
+  </body>
+</html>

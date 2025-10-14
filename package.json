@@ -1,0 +1,18 @@
+{
+  "name": "api-examples-web",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node ./scripts/server.js",
+    "pure": "node ./scripts/pure.js",
+    "lint": "prettier . --write --ignore-unknown"
+  },
+  "devDependencies": {
+    "express": "^4.18.2",
+    "prettier": "^3.3.3"
+  },
+  "author": "qz",
+  "license": "ISC",
+  "packageManager": "yarn@1.22.22"
+}

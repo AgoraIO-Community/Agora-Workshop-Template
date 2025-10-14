@@ -1,1 +1,1 @@
-# Agora-Workshop-Template
+# Agora Workshop Template
