@@ -333,7 +333,7 @@ $("#start-convo-ai").click(async function (e) {
       channel: options.channel,
       token: options.token,
       agent_rtc_uid: "10001", // AI agent user ID
-      remote_rtc_uids: ["10002"], // List of remote user IDs to subscribe, use * to subscribe all users
+      remote_rtc_uids: ["10000"], // List of remote user IDs to subscribe, use * to subscribe all users
       idle_timeout: 30, // Idle timeout in seconds
       enable_string_uid: false, // Whether to enable string UID
       advanced_features: {
