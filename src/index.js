@@ -1,3 +1,23 @@
+// load safe config from server endpoint
+async function loadClientConfig() {
+  try {
+    const res = await fetch("/config");
+    if (!res.ok) throw new Error("Failed to fetch /config");
+    const cfg = await res.json();
+    agora_AppID = cfg.AGORA_APPID || null;
+    // only set safe values client-side; do not set secrets here
+    // ensure options.appid is populated for later use
+    if (agora_AppID) options.appid = agora_AppID;
+    console.log("Client config loaded");
+  } catch (e) {
+    message.error("Missing or invalid client config; see console for details.");
+    console.warn("Could not load client config:", e);
+  }
+}
+
+loadClientConfig();
+
+
 let options = getOptionsFromLocal();
 let modeList = [
   {
@@ -25,16 +45,12 @@ $(() => {
   initDocUrl();
 });
 
-
-
 const saveConfig = () => {
   options.appid = escapeHTML($("#appid").val().trim());
   options.certificate = escapeHTML($("#certificate").val().trim());
   options.proxyMode = proxyModeItem.value;
   setOptionsToLocal(options);
 }
-
-
 
 const checkAppId = () => {
   // check appid

@@ -104,7 +104,7 @@ app.post("/api/convo-ai/agents/:agentId/leave", async (req, res) => {
 
 const server = app.listen(PORT, () => {
   const actualPort = server.address().port;
-  const URL = `http://localhost:${actualPort}/index.html`;
+  const URL = `http://localhost:${actualPort}/example/basic/basicVideoCall/index.html`;
   console.info(`\n---------------------------------------\n`);
   console.info(`please visit: ${URL}` );
   console.info(`\n---------------------------------------\n`);
