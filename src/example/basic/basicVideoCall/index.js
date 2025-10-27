@@ -15,6 +15,7 @@ var curVideoProfile;
 var agoraConvoTaskID = "";
 
 // All keys
+// WARNING: 
 let agora_AppID = null;
 let agora_Restful_Key = null; // DO NOT expose secrets to browser; keep null unless proxied
 let agora_Restful_Secret = null;
@@ -388,9 +389,10 @@ $("#start-convo-ai").click(async function (e) {
       tts: {
         vendor: "minimax", 
         params: {
+          url: "wss://api.minimax.io/ws/v1/t2a_v2", // Minimax TTS WebSocket URL
           group_id: tts_Minimax_GroupID,  // Minimax group ID, refer to https://www.minimax.io/platform/user-center/basic-information
           key: tts_Minimax_Key,        // Minimax TTS key, refer to https://www.minimax.io/platform/user-center/basic-information
-          model: "speech-01-turbo",
+          model: "speech-2.5-turbo-preview",
           voice_setting: {
             voice_id: "female-shaonv",
             speed: 1,
@@ -411,7 +413,7 @@ $("#start-convo-ai").click(async function (e) {
         secret_key: llm_Aws_Bedrock_Secret_Key,
         region: "us-east-1",
         model: "us.anthropic.claude-sonnet-4-20250514-v1:0",
-        greeting_message: "hello, please speak english with me",
+        greeting_message: "hello, how can I assist you today?",
         failure_message: "Sorry, I don't know how to answer your question",
         style: "bedrock"
       }, 
@@ -455,10 +457,9 @@ $("#start-convo-ai").click(async function (e) {
     }
     
     const responseData = await response.json();
+    agoraConvoTaskID = responseData.agent_id;
     message.success("Agora Convo AI started successfully!");
     console.log("Convo AI started successfully:", responseData);
-
-    agoraConvoTaskID = responseData.agent_id;
     
     // Disable button to prevent duplicate clicks
     $("#start-convo-ai").attr("disabled", true);
