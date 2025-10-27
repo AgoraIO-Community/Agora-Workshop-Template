@@ -10,8 +10,9 @@ var currentCam = null;
 var mics = [];
 var cams = [];
 var remoteUsers = {};
-var options = getOptionsFromLocal(); // Not needed 
+var options = getOptionsFromLocal(); 
 var curVideoProfile;
+var agoraConvoTaskID = "";
 
 // All keys
 let agora_AppID = null;
@@ -240,6 +241,7 @@ async function leave() {
   remoteUsers = {};
   // leave the channel
   await client.leave();
+  await stopAgoraConvoAI();
 }
 
 /*
@@ -364,7 +366,6 @@ $("#start-convo-ai").click(async function (e) {
     // Call Agora Convo AI RESTful API
     const convoAIEndpoint = "https://api.agora.io/api/conversational-ai-agent/v2/projects/" + options.appid + "/join";
     
-    
     // Build request data according to documentation
     const requestData = {
       name: options.channel,
@@ -388,46 +389,21 @@ $("#start-convo-ai").click(async function (e) {
         vendor: "minimax", 
         params: {
           group_id: tts_Minimax_GroupID,  // Minimax group ID, refer to https://www.minimax.io/platform/user-center/basic-information
+          key: tts_Minimax_Key,        // Minimax TTS key, refer to https://www.minimax.io/platform/user-center/basic-information
           model: "speech-01-turbo",
           voice_setting: {
-          voice_id: "female-shaonv",
-          speed: 1,
-          vol: 1,
-          pitch: 0,
-          emotion: "happy"
+            voice_id: "female-shaonv",
+            speed: 1,
+            vol: 1,
+            pitch: 0,
+            emotion: "happy"
           },
           audio_setting: {
-          sample_rate: 16000
+            sample_rate: 16000
           }
         },
         skip_patterns: [3, 4] // Skip content in parentheses and square brackets
       },
-      /* tts: {
-        vendor: "elevenlabs", 
-        params: {
-          key: "<your-tts-key>", // Eleven Labs TTS key, refer to https://www.elevenlabs.io/account/api-keys
-          model_id: "eleven_flash_v2_5",
-          voice_id: "pNInz6obpgDQGcFmaJgB",
-          sample_rate: 16000 // TTS vendor
-        },
-        skip_patterns: [3, 4] // Skip content in parentheses and square brackets
-      }, */
-      // llm: {
-      //   url: "https://api.openai.com/v1/chat/completions", // OpenAI callback URL
-      //   api_key: "<your-llm-key>", // LLM authentication API key
-      //   system_messages: [
-      //     {
-      //       role: "system",
-      //       content: "You are a helpful chatbot."
-      //     }
-      //         ],
-      //   max_history: 32,
-      //   greeting_message: "Hello, how can I assist you",
-      //   failure_message: "Please hold on a second.",
-      //   params: {
-      //     model: "gpt-4o-mini", // Model to use, refer to https://platform.openai.com/docs/models
-      //   }
-      // },
       llm: {
         url: "https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-sonnet-4-20250514-v1:0/converse-stream",
         api_key: llm_Aws_Bedrock_Key,
@@ -481,6 +457,8 @@ $("#start-convo-ai").click(async function (e) {
     const responseData = await response.json();
     message.success("Agora Convo AI started successfully!");
     console.log("Convo AI started successfully:", responseData);
+
+    agoraConvoTaskID = responseData.agent_id;
     
     // Disable button to prevent duplicate clicks
     $("#start-convo-ai").attr("disabled", true);
@@ -502,3 +480,52 @@ $("#start-convo-ai").click(async function (e) {
     $("#start-convo-ai").attr("disabled", false);
   }
 });
+
+async function stopAgoraConvoAI() {
+  try {
+    // use in-memory id or fallback to persisted id
+    const agentId = agoraConvoTaskID 
+    if (!agentId) return message.error("No active agent ID to stop.");
+
+    if (!options.appid) return message.error("Missing App ID (options.appid).");
+
+    const apiKey = agora_Restful_Key;
+    const apiSecret = agora_Restful_Secret;
+    if (!apiKey || !apiSecret) {
+      return message.error("Missing RESTful API Key/Secret. Use a server-side proxy to stop the agent safely.");
+    }
+
+    const url = `https://api.agora.io/api/conversational-ai-agent/v2/projects/${options.appid}/agents/${agentId}/leave`;
+
+    // disable stop button while request is in-flight (if you have one)
+    $("#stop-convo-ai").attr("disabled", true);
+    message.info("Stopping Agora Convo AI...");
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Authorization": "Basic " + btoa(apiKey + ":" + apiSecret),
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.log("stopAgoraConvoAI failed response text:", text);
+      throw new Error(text || res.statusText);
+    }
+
+    message.success("Agora Convo AI stopped successfully.");
+    console.log("Agora Convo AI stopped successfully.");
+    // clear stored agent id
+    agoraConvoTaskID = "";
+
+    // restore UI state
+    $("#start-convo-ai").attr("disabled", false);
+    $("#stop-convo-ai").attr("disabled", false);
+  } catch (error) {
+    message.error(error.message || "Failed to stop Agora Convo AI");
+    console.error("stopAgoraConvoAI error:", error);
+    $("#stop-convo-ai").attr("disabled", false);
+  }
+}
