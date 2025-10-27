@@ -376,7 +376,7 @@ $("#start-convo-ai").click(async function (e) {
         enable_rtm: false // Enable signaling service
       },
       asr: {
-        language: "ja-JP", // Use English as primary language
+        language: "en-US", // Use English as primary language
         vendor: "ares", // ASR vendor
       },
       tts: {
