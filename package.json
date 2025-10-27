@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "node ./scripts/server.js",
+    "dev": "node --env-file=.env ./scripts/server.js",
     "pure": "node ./scripts/pure.js",
     "lint": "prettier . --write --ignore-unknown"
   },
