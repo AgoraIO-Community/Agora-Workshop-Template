@@ -29,14 +29,14 @@ A streamlined workshop template built on top of Agora RTC Web SDK 4.x examples. 
    - In Agora Console, go to Developer Toolkit → RESTful API.
    - Download Key and Secret, save them for later use.
    - Replace the Secret and Key in the code with the actual values.
-      AGORA_REST_KEY=<your-restful-api-key>
-      AGORA_REST_SECRET=<your-restful-api-secret>
+      AGORA_REST_KEY="your-restful-api-key"
+      AGORA_REST_SECRET="<your-restful-api-secret>"
 4. Set Up Akool Account:
    - Register or Login Akool Console.https://akool.com/ (A test key will be provided in the workshop.)
    - Replace the Secret and Key in the code with the actual values.
-      AVATAR_AKOOL_KEY=<your-akool-secret>
+      AVATAR_AKOOL_KEY="<your-akool-secret>"
    - Pick an Avatar ID from Akool Console. (A test avatar ID will be provided in the workshop.) (in index.js)
-      avatar_id=<your-avatar-ID>
+      avatar_id="<your-avatar-ID>"
 5. Set Up LLM Account:
    - Register or Login AWS Console. 
    - Go to Amazon Bedrock and generate a bedrock API key 
