@@ -355,19 +355,12 @@ async function switchMicrophone(label) {
   await localTracks.audioTrack.setDevice(currentMic.deviceId);
 }
 
-// Agora Convo AI functionality
-// WARNING: This is ONLY for testing purposes. In production, please do NOT expose your RESTful API Key and Secret in client-side code.
+
 $("#start-convo-ai").click(async function (e) {
   try {
-    // Check if already joined the channel
-    if (!client || !options.channel) {
-      return message.error("Please join the channel first!");
-    }
-    
-    // Call Agora Convo AI RESTful API
-    const convoAIEndpoint = "https://api.agora.io/api/conversational-ai-agent/v2/projects/" + options.appid + "/join";
-    
-    // Build request data according to documentation
+    if (!client || !options.channel) return message.error("Please join the channel first!");
+
+   // Build request data according to documentation
     const requestData = {
       name: options.channel,
       properties: {
@@ -383,7 +376,7 @@ $("#start-convo-ai").click(async function (e) {
         enable_rtm: false // Enable signaling service
       },
       asr: {
-        language: "en-US", // Use English as primary language
+        language: "ja-JP", // Use English as primary language
         vendor: "ares", // ASR vendor
       },
       tts: {
@@ -414,7 +407,7 @@ $("#start-convo-ai").click(async function (e) {
         region: "us-east-1",
         model: "us.anthropic.claude-sonnet-4-20250514-v1:0",
         greeting_message: "hello, how can I assist you today?",
-        failure_message: "Sorry, I don't know how to answer your question",
+        failure_message: "Sorry, technical issues prevent me from responding right now.",
         style: "bedrock"
       }, 
       avatar: {
@@ -429,104 +422,58 @@ $("#start-convo-ai").click(async function (e) {
       }
     }
   };
-    
-    // Send request to Agora Convo AI API
-    // Use Restful API Key and Secret for authentication
-    const apiKey = agora_Restful_Key; // Replace with actual Restful API Key
-    const apiSecret = agora_Restful_Secret; // Replace with actual Restful API Secret
-    
-    // Check if API Key and Secret are set
-    if (apiKey === "YOUR_RESTFUL_API_KEY" || apiSecret === "YOUR_RESTFUL_API_SECRET") {
-      return message.error("Please set your Restful API Key and Secret in the code first!");
-    }
-    
-    message.info("Starting Agora Convo AI...");
-    
-    const response = await fetch(convoAIEndpoint, {
+
+    message.info("Starting Agora Convo AI (via server proxy)...");
+    const response = await fetch("/api/convo-ai/start", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Basic " + btoa(apiKey + ":" + apiSecret)
-      },
-      body: JSON.stringify(requestData)
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestData),
     });
-    
+
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error("Failed to start Convo AI: " + (errorData.message || response.statusText));
+      const err = await response.text();
+      throw new Error(err || response.statusText);
     }
-    
+
     const responseData = await response.json();
     agoraConvoTaskID = responseData.agent_id;
+    // try { localStorage.setItem("agoraConvoAgentId", agoraConvoTaskID); } catch (e){}
+
     message.success("Agora Convo AI started successfully!");
-    console.log("Convo AI started successfully:", responseData);
-    
-    // Disable button to prevent duplicate clicks
     $("#start-convo-ai").attr("disabled", true);
-    setTimeout(() => {
-      $("#start-convo-ai").attr("disabled", false);
-    }, 5000); // Restore button after 5 seconds
-    
   } catch (error) {
-    // Check if it's an authentication error
-    if (error.message && error.message.includes("Invalid authentication credentials")) {
-      message.error("Authentication failed: Please ensure correct Restful API Key and Secret are set");
-      console.error("Convo AI authentication error:", error);
-    } else {
-      message.error(error.message || "Error occurred while starting Convo AI");
-      console.error("Convo AI error:", error);
-    }
-    
-    // Restore button state
+    message.error(error.message || "Error occurred while starting Convo AI");
+    console.error("Convo AI error:", error);
     $("#start-convo-ai").attr("disabled", false);
   }
 });
 
 async function stopAgoraConvoAI() {
   try {
-    // use in-memory id or fallback to persisted id
-    const agentId = agoraConvoTaskID 
+    const agentId = agoraConvoTaskID
+    // || localStorage.getItem("agoraConvoAgentId");
     if (!agentId) return message.error("No active agent ID to stop.");
 
-    if (!options.appid) return message.error("Missing App ID (options.appid).");
-
-    const apiKey = agora_Restful_Key;
-    const apiSecret = agora_Restful_Secret;
-    if (!apiKey || !apiSecret) {
-      return message.error("Missing RESTful API Key/Secret. Use a server-side proxy to stop the agent safely.");
-    }
-
-    const url = `https://api.agora.io/api/conversational-ai-agent/v2/projects/${options.appid}/agents/${agentId}/leave`;
-
-    // disable stop button while request is in-flight (if you have one)
-    $("#stop-convo-ai").attr("disabled", true);
-    message.info("Stopping Agora Convo AI...");
-
-    const res = await fetch(url, {
+    message.info("Stopping Agora Convo AI (via server proxy)...");
+    const res = await fetch(`/api/convo-ai/agents/${agentId}/leave`, {
       method: "POST",
-      headers: {
-        "Authorization": "Basic " + btoa(apiKey + ":" + apiSecret),
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
     });
 
     if (!res.ok) {
       const text = await res.text();
-      console.log("stopAgoraConvoAI failed response text:", text);
       throw new Error(text || res.statusText);
     }
 
     message.success("Agora Convo AI stopped successfully.");
-    console.log("Agora Convo AI stopped successfully.");
-    // clear stored agent id
+    console.log("stopAgoraConvoAI success");
     agoraConvoTaskID = "";
-
-    // restore UI state
+    //localStorage.removeItem("agoraConvoAgentId");
     $("#start-convo-ai").attr("disabled", false);
-    $("#stop-convo-ai").attr("disabled", false);
   } catch (error) {
     message.error(error.message || "Failed to stop Agora Convo AI");
     console.error("stopAgoraConvoAI error:", error);
+  } finally {
     $("#stop-convo-ai").attr("disabled", false);
   }
 }

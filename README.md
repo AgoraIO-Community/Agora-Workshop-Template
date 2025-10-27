@@ -29,24 +29,29 @@ A streamlined workshop template built on top of Agora RTC Web SDK 4.x examples. 
    - In Agora Console, go to Developer Toolkit → RESTful API.
    - Download Key and Secret, save them for later use.
    - Replace the Secret and Key in the code with the actual values.
-      apiKey = "<your-restful-api-key>"; 
-      apiSecret = "<your-restful-api-secret>"; 
+      AGORA_REST_KEY=<your-restful-api-key>
+      AGORA_REST_SECRET=<your-restful-api-secret>
 4. Set Up Akool Account:
    - Register or Login Akool Console.https://akool.com/ (A test key will be provided in the workshop.)
    - Replace the Secret and Key in the code with the actual values.
-      api_key: "<your-akool-secret>",
-   - Pick an Avatar ID from Akool Console. (A test avatar ID will be provided in the workshop.)
-      avatar_id: "<your-avatar-ID>" 
+      AVATAR_AKOOL_KEY=<your-akool-secret>
+   - Pick an Avatar ID from Akool Console. (A test avatar ID will be provided in the workshop.) (in index.js)
+      avatar_id=<your-avatar-ID>
 5. Set Up LLM Account:
-   - Register or Login OpenAI Console. https://platform.openai.com/settings/organization/api-keys
-   - Replace the Secret and Key in the code with the actual values.
-      api_key: "<your-llm-key>"
+   - Register or Login AWS Console. 
+   - Go to Amazon Bedrock and generate a bedrock API key 
+   - Go to Amazon Bedrock > Model catalog > Select "Claude Sonnet 4". You may need to submit a use-case details form 
+   - Go to IAM and create a user with AmazonBedrockFullAccess permission. Then get a AWS "<your-aws-accesskey>" and "<your-aws-accesssecret>"
+   - Replace the AWS keys in the code with the actual values
+      LLM_AWS_BEDROCK_KEY=<your-llm-key>
+      LLM_AWS_BEDROCK_ACCESS_KEY=<your-aws-accesskey>
+      LLM_AWS_BEDROCK_SECRET_KEY=<your-aws-accesssecret>
 6. Set Up TTS Account:
    - Register or Login Minimax Console. https://www.minimax.io/platform/user-center/basic-information
    - Generate the API Key. https://www.minimax.io/platform/user-center/basic-information/interface-key
    - Replace the GroupID and Key in the code with the actual values.
-      group_id: "<your-minimax-groupid>", 
-      key: "<your-tts-key>",
+      TTS_MINIMAX_GROUPID=<your-minimax-groupid>
+      TTS_MINIMAX_KEY:<your-tts-key>
 7. Start the local server:
    - npm run dev
    - The terminal prints a URL like `http://localhost:<port>/index.html`.
