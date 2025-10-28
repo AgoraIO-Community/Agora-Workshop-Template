@@ -18,8 +18,13 @@ A streamlined workshop template built on top of Agora RTC Web SDK 4.x examples. 
 
 ## Getting Started
 1. Install dependencies:
-   - npm install
-   - or yarn
+   ```bash
+   npm install // or yarn
+   ```
+2. Copy and edit environment file
+   ```bash
+    cp .env.example .env
+   ```
 2. Set Up Agora Account:
    - Register or Login Agora Console: https://console.agora.io/
    - Create a new Project with "Testing Mode: APP ID".
@@ -28,27 +33,34 @@ A streamlined workshop template built on top of Agora RTC Web SDK 4.x examples. 
 3. Generate Agora RESTful API Key:
    - In Agora Console, go to Developer Toolkit → RESTful API.
    - Download Key and Secret, save them for later use.
-   - Replace the Secret and Key in the code with the actual values.
-      apiKey = "<your-restful-api-key>"; 
-      apiSecret = "<your-restful-api-secret>"; 
+   - Replace the Secret and Key in the code with the actual values in the .env file.
+      - AGORA_REST_KEY="your-restful-api-key"
+      - AGORA_REST_SECRET="your-restful-api-secret"
 4. Set Up Akool Account:
    - Register or Login Akool Console.https://akool.com/ (A test key will be provided in the workshop.)
-   - Replace the Secret and Key in the code with the actual values.
-      api_key: "<your-akool-secret>",
-   - Pick an Avatar ID from Akool Console. (A test avatar ID will be provided in the workshop.)
-      avatar_id: "<your-avatar-ID>" 
+   - Replace the Secret and Key in the code with the actual value in the .env file.
+      - AVATAR_AKOOL_KEY="your-akool-secret"
+   - Pick an Avatar ID from Akool Console. (A test avatar ID will be provided in the workshop.) (in index.js)
+      - avatar_id="your-avatar-ID"
 5. Set Up LLM Account:
-   - Register or Login OpenAI Console. https://platform.openai.com/settings/organization/api-keys
-   - Replace the Secret and Key in the code with the actual values.
-      api_key: "<your-llm-key>"
+   - Register or Login AWS Console. 
+   - Go to Amazon Bedrock and generate a bedrock API key 
+   - Go to Amazon Bedrock > Model catalog > Select "Claude Sonnet 4". You may need to submit a use-case details form 
+   - Go to IAM and create a user with AmazonBedrockFullAccess permission. Then copy the AWS "your-aws-accesskey" and "your-aws-accesssecret"
+   - Replace the AWS keys in the code with the actual values in the .env file.
+      - LLM_AWS_BEDROCK_KEY="your-llm-key"
+      - LLM_AWS_BEDROCK_ACCESS_KEY="your-aws-accesskey"
+      - LLM_AWS_BEDROCK_SECRET_KEY="your-aws-accesssecret"
 6. Set Up TTS Account:
    - Register or Login Minimax Console. https://www.minimax.io/platform/user-center/basic-information
    - Generate the API Key. https://www.minimax.io/platform/user-center/basic-information/interface-key
-   - Replace the GroupID and Key in the code with the actual values.
-      group_id: "<your-minimax-groupid>", 
-      key: "<your-tts-key>",
+   - Replace the GroupID and Key in the code with the actual values in the .env file
+      - TTS_MINIMAX_GROUPID="your-minimax-groupid"
+      - TTS_MINIMAX_KEY="your-tts-key"
 7. Start the local server:
-   - npm run dev
+   ```bash
+   npm run dev \\ or yarn dev
+   ```
    - The terminal prints a URL like `http://localhost:<port>/index.html`.
    - Optional: set a fixed port (macOS/Linux): `PORT=3001 npm run dev`
 8. Open the app:
@@ -61,7 +73,6 @@ A streamlined workshop template built on top of Agora RTC Web SDK 4.x examples. 
 - Step 3: Create Track & Publish — click "Create Tracks and Publish"
 - Step 4: Subscribe & Play — pick a remote UID (if available), then subscribe and play
 - Step 5: Click "Leave Channel" when finished
-
 
 
 ## Try It Out (Customization)

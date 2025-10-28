@@ -10,8 +10,48 @@ var currentCam = null;
 var mics = [];
 var cams = [];
 var remoteUsers = {};
-var options = getOptionsFromLocal();
+var options = getOptionsFromLocal(); 
 var curVideoProfile;
+var agoraConvoTaskID = "";
+
+// All keys
+// WARNING: 
+let agora_AppID = null;
+let agora_Restful_Key = null; // DO NOT expose secrets to browser; keep null unless proxied
+let agora_Restful_Secret = null;
+let llm_Aws_Bedrock_Key = null;
+let llm_Aws_Bedrock_Access_Key = null;
+let llm_Aws_Bedrock_Secret_Key = null;
+let tts_Minimax_Key = null;
+let tts_Minimax_GroupID = null;
+let avatar_Akool_Key = null;
+
+// load safe config from server endpoint
+async function loadClientConfig() {
+  try {
+    const res = await fetch("/config");
+    if (!res.ok) throw new Error("Failed to fetch /config");
+    const cfg = await res.json();
+    agora_AppID = cfg.AGORA_APPID || null;
+    // only set safe values client-side; do not set secrets here
+    // ensure options.appid is populated for later use
+    if (agora_AppID) options.appid = agora_AppID;
+    agora_Restful_Key = cfg.AGORA_REST_KEY || null;
+    agora_Restful_Secret = cfg.AGORA_REST_SECRET || null;
+    llm_Aws_Bedrock_Key = cfg.LLM_AWS_BEDROCK_KEY || null;
+    llm_Aws_Bedrock_Access_Key = cfg.LLM_AWS_BEDROCK_ACCESS_KEY || null;
+    llm_Aws_Bedrock_Secret_Key = cfg.LLM_AWS_BEDROCK_SECRET_KEY || null;
+    tts_Minimax_Key = cfg.TTS_MINIMAX_KEY || null;
+    tts_Minimax_GroupID = cfg.TTS_MINIMAX_GROUPID || null;
+    avatar_Akool_Key = cfg.AVATAR_AKOOL_KEY || null;
+    console.log("Client config loaded");
+  } catch (e) {
+    message.error("Missing or invalid client config; see console for details.");
+    console.warn("Could not load client config:", e);
+  }
+}
+
+loadClientConfig();
 
 AgoraRTC.onAutoplayFailed = () => {
   alert("click to start autoplay!");
@@ -202,6 +242,7 @@ async function leave() {
   remoteUsers = {};
   // leave the channel
   await client.leave();
+  await stopAgoraConvoAI();
 }
 
 /*
@@ -314,19 +355,12 @@ async function switchMicrophone(label) {
   await localTracks.audioTrack.setDevice(currentMic.deviceId);
 }
 
-// Agora Convo AI functionality
+
 $("#start-convo-ai").click(async function (e) {
   try {
-    // Check if already joined the channel
-    if (!client || !options.channel) {
-      return message.error("Please join the channel first!");
-    }
-    
-    // Call Agora Convo AI RESTful API
-    const convoAIEndpoint = "https://api.agora.io/api/conversational-ai-agent/v2/projects/" + options.appid + "/join";
-    
-    
-    // Build request data according to documentation
+    if (!client || !options.channel) return message.error("Please join the channel first!");
+
+   // Build request data according to documentation
     const requestData = {
       name: options.channel,
       properties: {
@@ -348,69 +382,39 @@ $("#start-convo-ai").click(async function (e) {
       tts: {
         vendor: "minimax", 
         params: {
-          group_id: "<your-minimax-groupid>",  // Minimax group ID, refer to https://www.minimax.io/platform/user-center/basic-information
-          key: "<your-tts-key>", // Minimax TTS key, refer to https://www.minimax.io/platform/user-center/basic-information/interface-key
-          model: "speech-01-turbo",
+          url: "wss://api.minimax.io/ws/v1/t2a_v2", // Minimax TTS WebSocket URL
+          group_id: tts_Minimax_GroupID,  // Minimax group ID, refer to https://www.minimax.io/platform/user-center/basic-information
+          key: tts_Minimax_Key,        // Minimax TTS key, refer to https://www.minimax.io/platform/user-center/basic-information
+          model: "speech-2.5-turbo-preview",
           voice_setting: {
-          voice_id: "female-shaonv",
-          speed: 1,
-          vol: 1,
-          pitch: 0,
-          emotion: "happy"
+            voice_id: "female-shaonv",
+            speed: 1,
+            vol: 1,
+            pitch: 0,
+            emotion: "happy"
           },
           audio_setting: {
-          sample_rate: 16000
+            sample_rate: 16000
           }
         },
         skip_patterns: [3, 4] // Skip content in parentheses and square brackets
       },
-      /* tts: {
-        vendor: "elevenlabs", 
-        params: {
-          key: "<your-tts-key>", // Eleven Labs TTS key, refer to https://www.elevenlabs.io/account/api-keys
-          model_id: "eleven_flash_v2_5",
-          voice_id: "pNInz6obpgDQGcFmaJgB",
-          sample_rate: 16000 // TTS vendor
-        },
-        skip_patterns: [3, 4] // Skip content in parentheses and square brackets
-      }, */
       llm: {
-        url: "https://api.openai.com/v1/chat/completions", // OpenAI callback URL
-        api_key: "<your-llm-key>", // LLM authentication API key
-        system_messages: [
-          {
-            role: "system",
-            content: "You are a helpful chatbot."
-          }
-              ],
-        max_history: 32,
-        greeting_message: "Hello, how can I assist you",
-        failure_message: "Please hold on a second.",
-        params: {
-          model: "gpt-4o-mini", // Model to use, refer to https://platform.openai.com/docs/models
-        }
-      },
-      /* llm: {
-        url: "https://api.groq.com/openai/v1/chat/completions", // Groq callback URL
-        api_key: "<your-llm-key>", // LLM authentication API key, refer to https://console.groq.com/keys 
-        system_messages: [
-          {
-            role: "system",
-            content: "You are a helpful chatbot."
-          }
-              ],
-        max_history: 32,
-        greeting_message: "Hello, how can I assist you",
-        failure_message: "Please hold on a second.",
-        params: {
-          model: "llama-3.1-8b-instant", // Model to use, refer to https://console.groq.com/docs/models
-        }
-      }, */
+        url: "https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-sonnet-4-20250514-v1:0/converse-stream",
+        api_key: llm_Aws_Bedrock_Key,
+        access_key: llm_Aws_Bedrock_Access_Key,
+        secret_key: llm_Aws_Bedrock_Secret_Key,
+        region: "us-east-1",
+        model: "us.anthropic.claude-sonnet-4-20250514-v1:0",
+        greeting_message: "hello, how can I assist you today?",
+        failure_message: "Sorry, technical issues prevent me from responding right now.",
+        style: "bedrock"
+      }, 
       avatar: {
         vendor: "akool",
         enable: true,
         params: {
-          api_key: "<your-akool-secret>",
+          api_key: avatar_Akool_Key,
           agora_uid: "10002",
           // agora_token: "avatar_rtc_token",
           avatar_id: "dvp_Sean_agora" // Available Avatar IDs: dvp_Sean_agora, dvp_Alinna_emotionsit_agora, dvp_Emma_agora, dvp_Dave_agora
@@ -418,54 +422,58 @@ $("#start-convo-ai").click(async function (e) {
       }
     }
   };
-    
-    // Send request to Agora Convo AI API
-    // Use Restful API Key and Secret for authentication
-    const apiKey = "<your-restful-api-key>"; // Replace with actual Restful API Key
-    const apiSecret = "<your-restful-api-secret>"; // Replace with actual Restful API Secret
-    
-    // Check if API Key and Secret are set
-    if (apiKey === "YOUR_RESTFUL_API_KEY" || apiSecret === "YOUR_RESTFUL_API_SECRET") {
-      return message.error("Please set your Restful API Key and Secret in the code first!");
-    }
-    
-    message.info("Starting Agora Convo AI...");
-    
-    const response = await fetch(convoAIEndpoint, {
+
+    message.info("Starting Agora Convo AI (via server proxy)...");
+    const response = await fetch("/api/convo-ai/start", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Basic " + btoa(apiKey + ":" + apiSecret)
-      },
-      body: JSON.stringify(requestData)
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestData),
     });
-    
+
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error("Failed to start Convo AI: " + (errorData.message || response.statusText));
+      const err = await response.text();
+      throw new Error(err || response.statusText);
     }
-    
+
     const responseData = await response.json();
+    agoraConvoTaskID = responseData.agent_id;
+    // try { localStorage.setItem("agoraConvoAgentId", agoraConvoTaskID); } catch (e){}
+
     message.success("Agora Convo AI started successfully!");
-    console.log("Convo AI started successfully:", responseData);
-    
-    // Disable button to prevent duplicate clicks
     $("#start-convo-ai").attr("disabled", true);
-    setTimeout(() => {
-      $("#start-convo-ai").attr("disabled", false);
-    }, 5000); // Restore button after 5 seconds
-    
   } catch (error) {
-    // Check if it's an authentication error
-    if (error.message && error.message.includes("Invalid authentication credentials")) {
-      message.error("Authentication failed: Please ensure correct Restful API Key and Secret are set");
-      console.error("Convo AI authentication error:", error);
-    } else {
-      message.error(error.message || "Error occurred while starting Convo AI");
-      console.error("Convo AI error:", error);
-    }
-    
-    // Restore button state
+    message.error(error.message || "Error occurred while starting Convo AI");
+    console.error("Convo AI error:", error);
     $("#start-convo-ai").attr("disabled", false);
   }
 });
+
+async function stopAgoraConvoAI() {
+  try {
+    const agentId = agoraConvoTaskID
+    // || localStorage.getItem("agoraConvoAgentId");
+    if (!agentId) return message.error("No active agent ID to stop.");
+
+    message.info("Stopping Agora Convo AI (via server proxy)...");
+    const res = await fetch(`/api/convo-ai/agents/${agentId}/leave`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || res.statusText);
+    }
+
+    message.success("Agora Convo AI stopped successfully.");
+    console.log("stopAgoraConvoAI success");
+    agoraConvoTaskID = "";
+    //localStorage.removeItem("agoraConvoAgentId");
+    $("#start-convo-ai").attr("disabled", false);
+  } catch (error) {
+    message.error(error.message || "Failed to stop Agora Convo AI");
+    console.error("stopAgoraConvoAI error:", error);
+  } finally {
+    $("#stop-convo-ai").attr("disabled", false);
+  }
+}

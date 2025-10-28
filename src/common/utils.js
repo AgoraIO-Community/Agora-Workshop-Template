@@ -61,7 +61,7 @@ function __checkLocalOptions() {
       return;
     }
     if (!options.appid) {
-      alert("Need to set up appID and appCertificate!");
+      alert("Need to set up appID and appCertificate! Redirecting to setup page.");
       window.location.href = SETUP_PAGE_URL;
     }
   }
@@ -444,7 +444,7 @@ function generateRandomString(length) {
 
 // exec functions
 __queryUrlParams();
-__checkLocalOptions();
+// __checkLocalOptions();
 __addAppInfoUI();
 __checkExperienceTime();
 generateRandomString(6);
