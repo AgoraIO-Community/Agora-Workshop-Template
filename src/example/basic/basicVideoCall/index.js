@@ -10,15 +10,13 @@ var currentCam = null;
 var mics = [];
 var cams = [];
 var remoteUsers = {};
-var options = getOptionsFromLocal(); 
+var options = getOptionsFromLocal();
 var curVideoProfile;
 var agoraConvoTaskID = "";
 
 // All keys
-// WARNING: 
+// WARNING: Do NOT expose your RESTful API Key and Secret in production environment.
 let agora_AppID = null;
-let agora_Restful_Key = null; // DO NOT expose secrets to browser; keep null unless proxied
-let agora_Restful_Secret = null;
 let llm_Aws_Bedrock_Key = null;
 let llm_Aws_Bedrock_Access_Key = null;
 let llm_Aws_Bedrock_Secret_Key = null;
@@ -34,10 +32,7 @@ async function loadClientConfig() {
     const cfg = await res.json();
     agora_AppID = cfg.AGORA_APPID || null;
     // only set safe values client-side; do not set secrets here
-    // ensure options.appid is populated for later use
     if (agora_AppID) options.appid = agora_AppID;
-    agora_Restful_Key = cfg.AGORA_REST_KEY || null;
-    agora_Restful_Secret = cfg.AGORA_REST_SECRET || null;
     llm_Aws_Bedrock_Key = cfg.LLM_AWS_BEDROCK_KEY || null;
     llm_Aws_Bedrock_Access_Key = cfg.LLM_AWS_BEDROCK_ACCESS_KEY || null;
     llm_Aws_Bedrock_Secret_Key = cfg.LLM_AWS_BEDROCK_SECRET_KEY || null;
@@ -62,9 +57,12 @@ AgoraRTC.onMicrophoneChanged = async (changedDevice) => {
   if (changedDevice.state === "ACTIVE") {
     localTracks.audioTrack.setDevice(changedDevice.device.deviceId);
     // Switch to an existing device when the current device is unplugged.
-  } else if (changedDevice.device.label === localTracks.audioTrack.getTrackLabel()) {
+  } else if (
+    changedDevice.device.label === localTracks.audioTrack.getTrackLabel()
+  ) {
     const oldMicrophones = await AgoraRTC.getMicrophones();
-    oldMicrophones[0] && localTracks.audioTrack.setDevice(oldMicrophones[0].deviceId);
+    oldMicrophones[0] &&
+      localTracks.audioTrack.setDevice(oldMicrophones[0].deviceId);
   }
 };
 
@@ -73,7 +71,9 @@ AgoraRTC.onCameraChanged = async (changedDevice) => {
   if (changedDevice.state === "ACTIVE") {
     localTracks.videoTrack.setDevice(changedDevice.device.deviceId);
     // Switch to an existing device when the current device is unplugged.
-  } else if (changedDevice.device.label === localTracks.videoTrack.getTrackLabel()) {
+  } else if (
+    changedDevice.device.label === localTracks.videoTrack.getTrackLabel()
+  ) {
     const oldCameras = await AgoraRTC.getCameras();
     oldCameras[0] && localTracks.videoTrack.setDevice(oldCameras[0].deviceId);
   }
@@ -121,7 +121,7 @@ $("#step-join").click(async function (e) {
     $("#step-leave").attr("disabled", false);
     $("#mirror-check").attr("disabled", false);
   } catch (error) {
-    if (error.code === 'CAN_NOT_GET_GATEWAY_SERVER') {
+    if (error.code === "CAN_NOT_GET_GATEWAY_SERVER") {
       return message.error("Token parameter error,please check your token.");
     }
     message.error(error.message);
@@ -222,7 +222,7 @@ async function join() {
     options.appid,
     options.channel,
     options.token || null,
-    options.uid || null,
+    options.uid || null
   );
 }
 
@@ -285,7 +285,9 @@ function handleUserPublished(user, mediaType) {
   const id = user.uid;
   remoteUsers[id] = user;
   if (!$(`#remote-option-${id}`).length) {
-    $("#remote-uid-select").append(`<option value="${id}" id="remote-option-${id}">${id}</option>`);
+    $("#remote-uid-select").append(
+      `<option value="${id}" id="remote-option-${id}">${id}</option>`
+    );
     $("#remote-uid-select").val(id);
   }
 }
@@ -355,73 +357,81 @@ async function switchMicrophone(label) {
   await localTracks.audioTrack.setDevice(currentMic.deviceId);
 }
 
-
 $("#start-convo-ai").click(async function (e) {
   try {
-    if (!client || !options.channel) return message.error("Please join the channel first!");
+    if (!client || !options.channel)
+      return message.error("Please join the channel first!");
 
-   // Build request data according to documentation
+    // Build request data according to documentation
     const requestData = {
       name: options.channel,
       properties: {
-      channel: options.channel,
-      token: options.token,
-      agent_rtc_uid: "10001", // AI agent user ID
-      remote_rtc_uids: ["10000"], // List of remote user IDs to subscribe, use * to subscribe all users
-      idle_timeout: 30, // Idle timeout in seconds
-      enable_string_uid: false, // Whether to enable string UID
-      advanced_features: {
-        enable_aivad: false, // Enable intelligent interruption handling
-        enable_mllm: false, // Enable multimodal large language model
-        enable_rtm: false // Enable signaling service
-      },
-      asr: {
-        language: "en-US", // Use English as primary language
-        vendor: "ares", // ASR vendor
-      },
-      tts: {
-        vendor: "minimax", 
-        params: {
-          url: "wss://api.minimax.io/ws/v1/t2a_v2", // Minimax TTS WebSocket URL
-          group_id: tts_Minimax_GroupID,  // Minimax group ID, refer to https://www.minimax.io/platform/user-center/basic-information
-          key: tts_Minimax_Key,        // Minimax TTS key, refer to https://www.minimax.io/platform/user-center/basic-information
-          model: "speech-2.5-turbo-preview",
-          voice_setting: {
-            voice_id: "female-shaonv",
-            speed: 1,
-            vol: 1,
-            pitch: 0,
-            emotion: "happy"
-          },
-          audio_setting: {
-            sample_rate: 16000
-          }
+        channel: options.channel, // Agora Channel
+        token: "", // Agora token for ConvoAI Agent, not needed if app certificate is disabled
+        agent_rtc_uid: "10001", // AI agent user ID
+        remote_rtc_uids: ["10000"], // List of remote user IDs to subscribe, use * to subscribe all users
+        idle_timeout: 30, // Idle timeout in seconds
+        enable_string_uid: false, // Whether to enable string UID
+        advanced_features: {
+          enable_aivad: false, // Enable intelligent interruption handling
+          enable_mllm: false, // Enable multimodal large language model
+          enable_rtm: false, // Enable signaling service
         },
-        skip_patterns: [3, 4] // Skip content in parentheses and square brackets
+        asr: {
+          language: "en-US", // ASR language, e.g., "en-US", "ja-JP", "zh-CN"
+          vendor: "ares", // ASR vendor
+        },
+        llm: {
+          style: "bedrock",
+          url: "https://bedrock-runtime.ap-northeast-1.amazonaws.com/model/apac.anthropic.claude-sonnet-4-20250514-v1:0/converse-stream",
+          api_key: llm_Aws_Bedrock_Key,
+          access_key: llm_Aws_Bedrock_Access_Key,
+          secret_key: llm_Aws_Bedrock_Secret_Key,
+          region: "ap-northeast-1",
+          model: "apac.anthropic.claude-sonnet-4-20250514-v1:0",
+          system_messages: [
+            {
+              role: "system",
+              content:
+                "You are a helpful chat bot. Keep answers short and concise. Only output plain text responses, without any markdown, HTML tags, or emojis. Do not include any formatting symbols. This is a voice-to-voice service.",
+            },
+          ],
+          greeting_message: "hello, how can I assist you today?",
+          failure_message:
+            "Sorry, technical issues prevent me from responding right now.",
+        },
+        tts: {
+          vendor: "minimax",
+          params: {
+            url: "wss://api.minimax.io/ws/v1/t2a_v2", // Minimax TTS WebSocket URL
+            group_id: tts_Minimax_GroupID, // Minimax group ID, refer to https://www.minimax.io/platform/user-center/basic-information
+            key: tts_Minimax_Key, // Minimax TTS key, refer to https://www.minimax.io/platform/user-center/basic-information
+            model: "speech-2.5-turbo-preview",
+            voice_setting: {
+              voice_id: "English_Lively_Male_11",
+              speed: 1,
+              vol: 1,
+              pitch: 0,
+              emotion: "happy",
+            },
+            audio_setting: {
+              sample_rate: 16000,
+            },
+          },
+          skip_patterns: [3, 4], // Skip content in parentheses and square brackets
+        },
+        avatar: {
+          vendor: "akool",
+          enable: true,
+          params: {
+            api_key: avatar_Akool_Key,
+            agora_uid: "10002",
+            // agora_token: "avatar_rtc_token", // Optional: if Agora app certificate is enabled in the project, provide the token for the avatar here
+            avatar_id: "dvp_Sean_agora", // Available Avatar IDs: dvp_Sean_agora, dvp_Alinna_emotionsit_agora, dvp_Emma_agora, dvp_Dave_agora
+          },
+        },
       },
-      llm: {
-        url: "https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-sonnet-4-20250514-v1:0/converse-stream",
-        api_key: llm_Aws_Bedrock_Key,
-        access_key: llm_Aws_Bedrock_Access_Key,
-        secret_key: llm_Aws_Bedrock_Secret_Key,
-        region: "us-east-1",
-        model: "us.anthropic.claude-sonnet-4-20250514-v1:0",
-        greeting_message: "hello, how can I assist you today?",
-        failure_message: "Sorry, technical issues prevent me from responding right now.",
-        style: "bedrock"
-      }, 
-      avatar: {
-        vendor: "akool",
-        enable: true,
-        params: {
-          api_key: avatar_Akool_Key,
-          agora_uid: "10002",
-          // agora_token: "avatar_rtc_token",
-          avatar_id: "dvp_Sean_agora" // Available Avatar IDs: dvp_Sean_agora, dvp_Alinna_emotionsit_agora, dvp_Emma_agora, dvp_Dave_agora
-        }
-      }
-    }
-  };
+    };
 
     message.info("Starting Agora Convo AI (via server proxy)...");
     const response = await fetch("/api/convo-ai/start", {
@@ -440,6 +450,8 @@ $("#start-convo-ai").click(async function (e) {
     // try { localStorage.setItem("agoraConvoAgentId", agoraConvoTaskID); } catch (e){}
 
     message.success("Agora Convo AI started successfully!");
+    console.log("Agora Convo AI started successfully! ", responseData);
+
     $("#start-convo-ai").attr("disabled", true);
   } catch (error) {
     message.error(error.message || "Error occurred while starting Convo AI");
@@ -450,7 +462,7 @@ $("#start-convo-ai").click(async function (e) {
 
 async function stopAgoraConvoAI() {
   try {
-    const agentId = agoraConvoTaskID
+    const agentId = agoraConvoTaskID;
     // || localStorage.getItem("agoraConvoAgentId");
     if (!agentId) return message.error("No active agent ID to stop.");
 

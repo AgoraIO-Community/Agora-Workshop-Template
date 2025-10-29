@@ -18,9 +18,6 @@ app.use(express.static(dir));
 app.get("/config", (req, res) => {
   res.json({
     AGORA_APPID: process.env.AGORA_APPID || null,
-    PROXY_PORT: process.env.PROXY_PORT || null,
-    AGORA_REST_KEY: process.env.AGORA_REST_KEY || null,
-    AGORA_REST_SECRET: process.env.AGORA_REST_SECRET || null,
     LLM_AWS_BEDROCK_KEY: process.env.LLM_AWS_BEDROCK_KEY || null,
     LLM_AWS_BEDROCK_ACCESS_KEY: process.env.LLM_AWS_BEDROCK_ACCESS_KEY || null,
     LLM_AWS_BEDROCK_SECRET_KEY: process.env.LLM_AWS_BEDROCK_SECRET_KEY || null,
@@ -37,7 +34,9 @@ app.post("/api/convo-ai/start", async (req, res) => {
     const apiKey = process.env.AGORA_REST_KEY;
     const apiSecret = process.env.AGORA_REST_SECRET;
     if (!appid || !apiKey || !apiSecret) {
-      return res.status(500).json({ error: "Server misconfigured: missing Agora credentials" });
+      return res
+        .status(500)
+        .json({ error: "Server misconfigured: missing Agora credentials" });
     }
 
     const url = `https://api.agora.io/api/conversational-ai-agent/v2/projects/${appid}/join`;
@@ -46,7 +45,7 @@ app.post("/api/convo-ai/start", async (req, res) => {
     const response = await fetch(url, {
       method: "POST",
       headers: {
-        "Authorization": `Basic ${basic}`,
+        Authorization: `Basic ${basic}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(req.body || {}),
@@ -74,7 +73,9 @@ app.post("/api/convo-ai/agents/:agentId/leave", async (req, res) => {
     const apiKey = process.env.AGORA_REST_KEY;
     const apiSecret = process.env.AGORA_REST_SECRET;
     if (!appid || !apiKey || !apiSecret) {
-      return res.status(500).json({ error: "Server misconfigured: missing Agora credentials" });
+      return res
+        .status(500)
+        .json({ error: "Server misconfigured: missing Agora credentials" });
     }
 
     const url = `https://api.agora.io/api/conversational-ai-agent/v2/projects/${appid}/agents/${agentId}/leave`;
@@ -83,7 +84,7 @@ app.post("/api/convo-ai/agents/:agentId/leave", async (req, res) => {
     const response = await fetch(url, {
       method: "POST",
       headers: {
-        "Authorization": `Basic ${basic}`,
+        Authorization: `Basic ${basic}`,
         "Content-Type": "application/json",
       },
     });
@@ -101,11 +102,10 @@ app.post("/api/convo-ai/agents/:agentId/leave", async (req, res) => {
   }
 });
 
-
 const server = app.listen(PORT, () => {
   const actualPort = server.address().port;
   const URL = `http://localhost:${actualPort}/example/basic/basicVideoCall/index.html`;
   console.info(`\n---------------------------------------\n`);
-  console.info(`please visit: ${URL}` );
+  console.info(`please visit: ${URL}`);
   console.info(`\n---------------------------------------\n`);
 });

@@ -61,7 +61,7 @@ A streamlined workshop template built on top of Agora RTC Web SDK 4.x examples. 
    ```bash
    npm run dev \\ or yarn dev
    ```
-   - The terminal prints a URL like `http://localhost:<port>/index.html`.
+   - The terminal prints a URL like `http://localhost:${actualPort}/example/basic/basicVideoCall/index.html`.
    - Optional: set a fixed port (macOS/Linux): `PORT=3001 npm run dev`
 8. Open the app:
    - Visit the printed URL.
