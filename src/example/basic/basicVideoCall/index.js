@@ -15,11 +15,9 @@ var curVideoProfile;
 var agoraConvoTaskID = "";
 
 // All keys
-// WARNING: Do NOT expose your RESTful API Key and Secret in production environment.
+// WARNING: Testing purposes only. Do NOT expose your RESTful API Key and Secret in production environment.
 let agora_AppID = null;
 let llm_Aws_Bedrock_Key = null;
-let llm_Aws_Bedrock_Access_Key = null;
-let llm_Aws_Bedrock_Secret_Key = null;
 let tts_Minimax_Key = null;
 let tts_Minimax_GroupID = null;
 let avatar_Akool_Key = null;
@@ -34,8 +32,6 @@ async function loadClientConfig() {
     // only set safe values client-side; do not set secrets here
     if (agora_AppID) options.appid = agora_AppID;
     llm_Aws_Bedrock_Key = cfg.LLM_AWS_BEDROCK_KEY || null;
-    llm_Aws_Bedrock_Access_Key = cfg.LLM_AWS_BEDROCK_ACCESS_KEY || null;
-    llm_Aws_Bedrock_Secret_Key = cfg.LLM_AWS_BEDROCK_SECRET_KEY || null;
     tts_Minimax_Key = cfg.TTS_MINIMAX_KEY || null;
     tts_Minimax_GroupID = cfg.TTS_MINIMAX_GROUPID || null;
     avatar_Akool_Key = cfg.AVATAR_AKOOL_KEY || null;
@@ -385,8 +381,6 @@ $("#start-convo-ai").click(async function (e) {
           style: "bedrock",
           url: "https://bedrock-runtime.ap-northeast-1.amazonaws.com/model/apac.anthropic.claude-sonnet-4-20250514-v1:0/converse-stream",
           api_key: llm_Aws_Bedrock_Key,
-          access_key: llm_Aws_Bedrock_Access_Key,
-          secret_key: llm_Aws_Bedrock_Secret_Key,
           region: "ap-northeast-1",
           model: "apac.anthropic.claude-sonnet-4-20250514-v1:0",
           system_messages: [
