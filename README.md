@@ -1,3 +1,4 @@
+
 # Agora Workshop Template
 
 A streamlined workshop template built on top of Agora RTC Web SDK 4.x examples. It includes a redesigned Basic Video Call page and a simplified developer console for quick demos and hands-on workshops.
@@ -19,47 +20,54 @@ A streamlined workshop template built on top of Agora RTC Web SDK 4.x examples. 
 ## Getting Started
 1. Install dependencies:
    ```bash
-   npm install // or yarn
+   npm install \\ or yarn 
    ```
 2. Copy and edit environment file
    ```bash
     cp .env.example .env
    ```
-2. Set Up Agora Account:
+   - `AGORA_APPID=your_agora_appid` 
+   - `AGORA_APPCERTIFICATE=your_agora_appcertificate` 
+   - `AGORA_REST_KEY=your_agora_restfulkey` 
+   - `AGORA_REST_SECRET=your_agora_restfulsecret` 
+   - `LLM_AWS_BEDROCK_KEY=your_aws_key` 
+   - `TTS_MINIMAX_KEY=your_tts_key`
+   - `TTS_MINIMAX_GROUPID=your_tts_groupid`
+   - `AVATAR_AKOOL_KEY=your_akool_key`
+
+   If you have all the keys required, skip to <b>Step 7</b>
+
+3. Set Up Agora Account:
    - Register or Login Agora Console: https://console.agora.io/
    - Create a new Project with "Testing Mode: APP ID".
    - Enable Conversational AI Engine.
    - Get the APP ID and save it for later use.
-3. Generate Agora RESTful API Key:
-   - In Agora Console, go to Developer Toolkit → RESTful API.
-   - Download Key and Secret, save them for later use.
+   - Go Developer Toolkit → RESTful API and download the Key and Secret. 
    - Replace the Secret and Key in the code with the actual values in the .env file.
+      - AGORA_APPID="your_agora_appid" 
       - AGORA_REST_KEY="your-restful-api-key"
       - AGORA_REST_SECRET="your-restful-api-secret"
-4. Set Up Akool Account:
-   - Register or Login Akool Console.https://akool.com/ (A test key will be provided in the workshop.)
-   - Replace the Secret and Key in the code with the actual value in the .env file.
-      - AVATAR_AKOOL_KEY="your-akool-secret"
-   - Pick an Avatar ID from Akool Console. (A test avatar ID will be provided in the workshop.) (in index.js)
-      - avatar_id="your-avatar-ID"
-5. Set Up LLM Account:
+4. Set Up LLM Account (Amazon Bedrock):
    - Register or Login AWS Console. 
    - Go to Amazon Bedrock and generate a bedrock API key 
    - Go to Amazon Bedrock > Model catalog > Select "Claude Sonnet 4". You may need to submit a use-case details form 
-   - Go to IAM and create a user with AmazonBedrockFullAccess permission. Then copy the AWS "your-aws-accesskey" and "your-aws-accesssecret"
-   - Replace the AWS keys in the code with the actual values in the .env file.
-      - LLM_AWS_BEDROCK_KEY="your-llm-key"
-      - LLM_AWS_BEDROCK_ACCESS_KEY="your-aws-accesskey"
-      - LLM_AWS_BEDROCK_SECRET_KEY="your-aws-accesssecret"
-6. Set Up TTS Account:
+   - Replace the AWS key in the code with the actual values in the .env file.
+      LLM_AWS_BEDROCK_KEY="your-llm-key"
+5. Set Up TTS Account (Minimax):
    - Register or Login Minimax Console. https://www.minimax.io/platform/user-center/basic-information
    - Generate the API Key. https://www.minimax.io/platform/user-center/basic-information/interface-key
-   - Replace the GroupID and Key in the code with the actual values in the .env file
-      - TTS_MINIMAX_GROUPID="your-minimax-groupid"
-      - TTS_MINIMAX_KEY="your-tts-key"
+   - Replace the GroupID and Key in the code with the actual values in the .env file.
+      TTS_MINIMAX_GROUPID="your-minimax-groupid"
+      TTS_MINIMAX_KEY="your-tts-key"
+6. Set Up Avatar Account (Akool):
+   - Register or Login Akool Console.https://akool.com/ (A test key will be provided in the workshop.)
+   - Replace Key in the code with the actual value in the .env file.
+      AVATAR_AKOOL_KEY="your-akool-secret"
+   - Pick an Avatar ID from Akool Console. (A test avatar ID will be provided in the workshop.) (in index.js)
+      avatar_id="your-avatar-ID"
 7. Start the local server:
    ```bash
-   npm run dev \\ or yarn dev
+   npm run dev  \\ or yarn dev
    ```
    - The terminal prints a URL like `http://localhost:${actualPort}/example/basic/basicVideoCall/index.html`.
    - Optional: set a fixed port (macOS/Linux): `PORT=3001 npm run dev`
@@ -117,3 +125,5 @@ A streamlined workshop template built on top of Agora RTC Web SDK 4.x examples. 
 
 ## License
 ISC
+
+

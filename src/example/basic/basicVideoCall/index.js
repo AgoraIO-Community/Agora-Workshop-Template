@@ -387,7 +387,7 @@ $("#start-convo-ai").click(async function (e) {
             {
               role: "system",
               content:
-                "You are a helpful chat bot. Keep answers short and concise. Only output plain text responses, without any markdown, HTML tags, or emojis. Do not include any formatting symbols. This is a voice-to-voice service.",
+                "You are a helpful chat bot", // Write your system prompt here (e.g. you are a tour guide, you are a math teacher, etc.)
             },
           ],
           greeting_message: "hello, how can I assist you today?",
@@ -402,7 +402,7 @@ $("#start-convo-ai").click(async function (e) {
             key: tts_Minimax_Key, // Minimax TTS key, refer to https://www.minimax.io/platform/user-center/basic-information
             model: "speech-2.5-turbo-preview",
             voice_setting: {
-              voice_id: "English_Lively_Male_11",
+              voice_id: "English_Lively_Male_11", // Select a voice you want https://www.minimax.io/audio/voices
               speed: 1,
               vol: 1,
               pitch: 0,
@@ -423,7 +423,12 @@ $("#start-convo-ai").click(async function (e) {
             // agora_token: "avatar_rtc_token", // Optional: if Agora app certificate is enabled in the project, provide the token for the avatar here
             avatar_id: "dvp_Sean_agora", // Available Avatar IDs: dvp_Sean_agora, dvp_Alinna_emotionsit_agora, dvp_Emma_agora, dvp_Dave_agora
           },
-        },
+        }
+        //,
+        // parameters: { 
+        //   data_channel: "rtm", // Agent data transmission through RTM channel or RTC data stream
+        //   enable_error_messages: false  // Whether to enable error messages from the agent
+        // }
       },
     };
 
