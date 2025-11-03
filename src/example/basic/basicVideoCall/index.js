@@ -379,10 +379,10 @@ $("#start-convo-ai").click(async function (e) {
         },
         llm: {
           style: "bedrock",
-          url: "https://bedrock-runtime.ap-northeast-1.amazonaws.com/model/apac.anthropic.claude-sonnet-4-20250514-v1:0/converse-stream",
+          url: "https://bedrock-runtime.ap-southeast-7.amazonaws.com/model/apac.amazon.nova-pro-v1:0/converse-stream",
           api_key: llm_Aws_Bedrock_Key,
-          region: "ap-northeast-1",
-          model: "apac.anthropic.claude-sonnet-4-20250514-v1:0",
+          region: "ap-southeast-7",
+          model: "apac.amazon.nova-pro-v1:0",
           system_messages: [
             {
               role: "system",
@@ -390,9 +390,10 @@ $("#start-convo-ai").click(async function (e) {
                 "You are a helpful chat bot", // Write your system prompt here (e.g. you are a tour guide, you are a math teacher, etc.)
             },
           ],
-          greeting_message: "hello, how can I assist you today?",
+          greeting_message: "", // Do NOT set any greeting message
           failure_message:
             "Sorry, technical issues prevent me from responding right now.",
+          ignore_empty: true, // Whether to ignore empty user messages
         },
         tts: {
           vendor: "minimax",
@@ -400,7 +401,7 @@ $("#start-convo-ai").click(async function (e) {
             url: "wss://api.minimax.io/ws/v1/t2a_v2", // Minimax TTS WebSocket URL
             group_id: tts_Minimax_GroupID, // Minimax group ID, refer to https://www.minimax.io/platform/user-center/basic-information
             key: tts_Minimax_Key, // Minimax TTS key, refer to https://www.minimax.io/platform/user-center/basic-information
-            model: "speech-2.5-turbo-preview",
+            model: "speech-2.6-turbo",
             voice_setting: {
               voice_id: "English_Lively_Male_11", // Select a voice you want https://www.minimax.io/audio/voices
               speed: 1,
