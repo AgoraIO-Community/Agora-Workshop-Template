@@ -30,7 +30,7 @@ const __message = (message, type) => {
   }, 3000);
 };
 
-function __queryUrlParams() {
+/* function __queryUrlParams() {
   var urlParams = new URL(location.href).searchParams;
   if (urlParams.size) {
     // let appid = urlParams.get("appid");
@@ -51,7 +51,7 @@ function __queryUrlParams() {
     certificate && $("#certificate").val(certificate);
     channel && $("#channel").val(channel);
   }
-}
+} */
 
 function __checkLocalOptions() {
   if (window.location.href != SETUP_PAGE_URL) {
@@ -68,7 +68,7 @@ function __checkLocalOptions() {
 }
 
 function __addAppInfoUI() {
-  const options = getOptionsFromLocal();
+  /*const options = getOptionsFromLocal();
   let appid = "";
   let certificate = "";
   const res = __getEncryptFromUrl();
@@ -78,7 +78,7 @@ function __addAppInfoUI() {
   } else {
     appid = "encryptedId";
     certificate = "encryptedSecret";
-  }
+  } */
   let language = getLanguage();
   const href = window.location.href;
   let reg = /\/(\w+)\/index\.html$/;
@@ -109,12 +109,12 @@ function __addAppInfoUI() {
         "https://docs.agora.io/en/video-calling/get-started/get-started-sdk?platform=web";
     }
   }
-  var $newElement = $(`<div class="pt-3" style="color:#54667a; font-size:14px;">
-    <div>AppID: ${appid}</div> 
-    <div>AppCertificate: ${certificate}</div> 
-  </div>`);
+  //var $newElement = $(`<div class="pt-3" style="color:#54667a; font-size:14px;">
+  //  <div>AppID: ${appid}</div> 
+  // <div>AppCertificate: ${certificate}</div> 
+  // </div>`);
 
-  $("#app-info").append($newElement);
+  //$("#app-info").append($newElement);
   $(".btn-jump-setup").click(() => {
     const href = window.location.href;
     __setJumpBackUrl(href);
@@ -229,17 +229,17 @@ function setOptionsToLocal(option) {
   localStorage.setItem("__options", JSON.stringify(option));
 }
 
-function getOptionsFromLocal() {
-  return JSON.parse(localStorage.getItem("__options")) || {};
-}
+//function getOptionsFromLocal() {
+//  return JSON.parse(localStorage.getItem("__options")) || {};
+//}
 
 function getLanguage() {
   const DEFAULT_LANGUAGE = "en";
-  const options = getOptionsFromLocal();
+ // const options = getOptionsFromLocal();
 
-  if (options && options.language) {
-    return options.language;
-  }
+ // if (options && options.language) {
+ //   return options.language;
+ // }
 
   if (navigator.language) {
     if (navigator.language == "zh-CN" || navigator.language == "zh") {
@@ -293,49 +293,6 @@ function getJumpBackUrl() {
 }
 
 // ---------------------- agora ----------------------------
-
-// tip: just use in demo code, don't use in production
-async function agoraContentInspect(localVideoTrack) {
-  if (AREA != "internal") {
-    // content inspect only for internal area
-    return;
-  }
-  if (!localVideoTrack) {
-    return;
-  }
-  if (_inspectIntervalId) {
-    clearInterval(_inspectIntervalId);
-  }
-  _inspectIntervalId = setInterval(async () => {
-    if (!localVideoTrack.isPlaying) {
-      clearInterval(_inspectIntervalId);
-      return;
-    }
-    let ImageData = localVideoTrack.getCurrentFrameData();
-    const base64Str = __ImageDataToBase64(ImageData);
-    let url = `${BASE_URL}/v1/moderation/image`;
-    const options = getOptionsFromLocal();
-    let resp = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        image: base64Str,
-        appId: options.appid,
-        channelName: options.channel,
-        src: "web",
-        traceId: __genUUID(),
-        userId: options.uid + "",
-      }),
-    }).then((resp) => resp.json());
-    if (resp.code == 0) {
-      console.log(`[agora content inspect] ${new Date()}`, resp.data);
-    } else {
-      console.error(resp);
-    }
-  }, 1000 * 10);
-}
 
 // The token used in the demo is solely for testing purposes; 
 // users are required to deploy their own token server to obtain the service.
@@ -419,7 +376,7 @@ async function agoraGetProjects() {
   return resp.data;
 }
 
-function generateRandomString(length) {
+/* function generateRandomString(length) {
 
   const options = getOptionsFromLocal();
   if (options.channel && options.channel.length === length) {
@@ -435,24 +392,17 @@ function generateRandomString(length) {
   }
   setOptionsToLocal({channel: result});
   
-}
-
-
-
+} */
 
 // ---------------------- agora ----------------------------
 
 // exec functions
-__queryUrlParams();
+// __queryUrlParams();
 // __checkLocalOptions();
 __addAppInfoUI();
 __checkExperienceTime();
-generateRandomString(6);
+// generateRandomString(6);
 
 
 $(() => {
-  const options = getOptionsFromLocal();
-  $('#channel').val(options.channel);
-  $('#channel-2').val(`${options.channel}2`);
-  $('#channel-link').attr("href",channel_link);
 })

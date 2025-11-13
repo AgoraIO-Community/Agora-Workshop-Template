@@ -30,7 +30,7 @@ A streamlined workshop template built on top of Agora RTC Web SDK 4.x examples. 
    - `AGORA_APPCERTIFICATE=your_agora_appcertificate` 
    - `AGORA_REST_KEY=your_agora_restfulkey` 
    - `AGORA_REST_SECRET=your_agora_restfulsecret` 
-   - `LLM_AWS_BEDROCK_KEY=your_aws_key` 
+   - `GROQ_KEY=your_groq_key` 
    - `TTS_MINIMAX_KEY=your_tts_key`
    - `TTS_MINIMAX_GROUPID=your_tts_groupid`
    - `AVATAR_AKOOL_KEY=your_akool_key`
@@ -42,17 +42,18 @@ A streamlined workshop template built on top of Agora RTC Web SDK 4.x examples. 
    - Create a new Project with "Testing Mode: APP ID".
    - Enable Conversational AI Engine.
    - Get the APP ID and save it for later use.
+   - Generate a temporary token for channel "10000" in the console
    - Go Developer Toolkit → RESTful API and download the Key and Secret. 
    - Replace the Secret and Key in the code with the actual values in the .env file.
       - AGORA_APPID="your_agora_appid" 
       - AGORA_REST_KEY="your-restful-api-key"
       - AGORA_REST_SECRET="your-restful-api-secret"
-4. Set Up LLM Account (Amazon Bedrock):
-   - Register or Login AWS Console. 
-   - Go to Amazon Bedrock and generate a bedrock API key 
-   - Go to Amazon Bedrock > Model catalog > Select "Claude Sonnet 4". You may need to submit a use-case details form 
-   - Replace the AWS key in the code with the actual values in the .env file.
-      LLM_AWS_BEDROCK_KEY="your-llm-key"
+      - AGORA_TOKEN="your token from the console"
+4. Set Up LLM Account (Groq):
+   - Register or Login Groq Console. https://console.groq.com/
+   - Go to Groq console and generate a API key 
+   - Replace the API key in the code with the actual values in the .env file.
+      GROQ_KEY="your-llm-key"
 5. Set Up TTS Account (Minimax):
    - Register or Login Minimax Console. https://www.minimax.io/platform/user-center/basic-information
    - Generate the API Key. https://www.minimax.io/platform/user-center/basic-information/interface-key

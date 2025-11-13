@@ -28,7 +28,7 @@
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { font-family: 'Noto Sans JP', sans-serif; background: var(--light-bg); color: var(--text-color); line-height: 1.6; font-size: var(--base-size); overflow: hidden; }
       .layout-wrapper { max-width: 1440px; height: 100vh; display: flex; margin: 0 auto; position: relative; overflow: hidden; background-color: var(--light-bg); }
-      .japanese-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.05; background-image:
+      .singapore-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.05; background-image:
         radial-gradient(circle at 10% 20%, #be353b 0%, transparent 20%),
         radial-gradient(circle at 90% 40%, #2d50a4 0%, transparent 30%),
         repeating-linear-gradient(45deg, #f5f1ee, #e8e1d9 1px, transparent 1px, transparent 50px);
@@ -72,7 +72,7 @@
 
   <body>
     <div class="layout-wrapper">
-      <div class="japanese-bg"></div>
+      <div class="singapore-bg"></div>
       
       <!-- 左侧视频区域（重构） -->
       <div class="video-section">
@@ -84,7 +84,7 @@
           <div class="video-overlay">
             <div class="user-info">
               <div class="user-avatar"></div>
-              <div class="user-name">Welcome to the Convo AI World in Japan</div>
+              <div class="user-name">Welcome to the Convo AI workshop in Singapore</div>
             </div>
           </div>
         </div>
@@ -94,7 +94,7 @@
       <div class="console-section">
         <div class="console-header">
           <img class="logo" id="console-logo" src="../../../assets/agora-logo-en.png" alt="Agora Logo" />
-          <h1 class="title">開発者コンソール</h1>
+          <h1 class="title">Convo AI workshop</h1>
         </div>
         
         <div class="console-content">
@@ -106,14 +106,14 @@
               </div>
               <div class="step-content">
                 <label class="form-label">Channel</label>
-                <input class="form-control" id="channel" type="text" placeholder="enter channel name" required />
+                <input class="form-control" id="channel" type="text" placeholder="enter channel name" value="10000"/>
                 <div class="mt-2">
                   <label class="form-label">User ID</label>
                   <input class="form-control" id="uid" type="text" onkeyup="this.value=this.value.replace(/[^0-9]/g,'')" onafterpaste="this.value=this.value.replace(/[^0-9]/g,'')" placeholder="Enter the user ID" value="10000" />
                 </div>
                 <div class="mt-2">
                   <label class="form-label">Token(optional)</label>
-                  <input class="form-control" id="token" type="text" placeholder="Enter the user Token" />
+                  <input class="form-control" id="token" type="text" placeholder="Enter the user Token"/>
                 </div>
               </div>
             </div>
