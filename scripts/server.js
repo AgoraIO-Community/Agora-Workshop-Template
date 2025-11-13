@@ -54,7 +54,7 @@ app.post("/api/convo-ai/start", async (req, res) => {
       body: JSON.stringify(req.body || {}),
     });
 
-    console.log("Convo API URL ->, url);
+    console.log("Convo API URL ->", url);
     console.log("Convo API body ->", JSON.stringify(req.body, null, 4));
 
 
