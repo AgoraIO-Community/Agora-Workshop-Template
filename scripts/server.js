@@ -18,7 +18,7 @@ app.use(express.static(dir));
 app.get("/config", (req, res) => {
   res.json({
     AGORA_APPID: process.env.AGORA_APPID || null,
-    TOKEN: process.env.AGORA_TOKEN || null,
+    AGORA_TOKEN: process.env.AGORA_TOKEN || null,
     LLM_AWS_BEDROCK_KEY: process.env.LLM_AWS_BEDROCK_KEY || null,
     LLM_AWS_BEDROCK_ACCESS_KEY: process.env.LLM_AWS_BEDROCK_ACCESS_KEY || null,
     LLM_AWS_BEDROCK_SECRET_KEY: process.env.LLM_AWS_BEDROCK_SECRET_KEY || null,
