@@ -44,7 +44,7 @@ async function loadClientConfig() {
     tts_Minimax_GroupID = cfg.TTS_MINIMAX_GROUPID || null;
     avatar_Akool_Key = cfg.AVATAR_AKOOL_KEY || null;
 
-    options.token = cfg.TOKEN || null;
+    options.token = cfg.AGORA_TOKEN || null;
    
     const inputElement = document.getElementById('token');
     inputElement.value = options.token;
