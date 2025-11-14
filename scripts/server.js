@@ -18,12 +18,15 @@ app.use(express.static(dir));
 app.get("/config", (req, res) => {
   res.json({
     AGORA_APPID: process.env.AGORA_APPID || null,
+    AGORA_TOKEN: process.env.AGORA_TOKEN || null,
     LLM_AWS_BEDROCK_KEY: process.env.LLM_AWS_BEDROCK_KEY || null,
     LLM_AWS_BEDROCK_ACCESS_KEY: process.env.LLM_AWS_BEDROCK_ACCESS_KEY || null,
     LLM_AWS_BEDROCK_SECRET_KEY: process.env.LLM_AWS_BEDROCK_SECRET_KEY || null,
+    OPENAI_KEY: process.env.OPENAI_KEY || null,
+    GROQ_KEY: process.env.GROQ_KEY || null,
     TTS_MINIMAX_KEY: process.env.TTS_MINIMAX_KEY || null,
     TTS_MINIMAX_GROUPID: process.env.TTS_MINIMAX_GROUPID || null,
-    AVATAR_AKOOL_KEY: process.env.AVATAR_AKOOL_KEY || null,
+    AVATAR_AKOOL_KEY: process.env.AVATAR_AKOOL_KEY || null
   });
 });
 
@@ -51,8 +54,15 @@ app.post("/api/convo-ai/start", async (req, res) => {
       body: JSON.stringify(req.body || {}),
     });
 
+    console.log("Convo API URL ->", url);
+    console.log("Convo API body ->", JSON.stringify(req.body, null, 4));
+
+
     const data = await response.text();
     const status = response.status;
+
+    console.log("Convo API response ->", JSON.stringify(data, null, 4));
+
     try {
       // return parsed JSON if possible
       return res.status(status).json(JSON.parse(data));

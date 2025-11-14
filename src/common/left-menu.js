@@ -44,8 +44,7 @@ function __initMenu() {
     logoImgSrc = `${ORIGIN_URL}/assets/agora-logo-zh.png`;
   }
   let logoHtml = `<img src=${logoImgSrc} alt="logo" style="width:56px; height: 30px;">`;
-  let menuHtml = `
-  <div class="sidebar">
+  let menuHtml = `<div class="sidebar">
   <div class="sidebar-top">
     <div class="border-bottom pb-3 mb-3 flex top-wrapper">
       <a href=${href} target="_blank" class="link-body-emphasis text-decoration-none">
@@ -58,8 +57,7 @@ function __initMenu() {
   <div class="sidebar-bottom">
     ${__transListToMenuDom(MENU_LIST)}
     </div
-  </div >
-    `;
+  </div >`;
 
   if (__isSmallScreen()) {
     menuHtml = `<nav class="navbar width-100 overflow-hidden">
@@ -78,8 +76,8 @@ function __initMenu() {
     </nav>`;
   }
 
-  const wrapper = document.querySelector(".container .left");
-  wrapper.innerHTML = menuHtml;
+  // const wrapper = document.querySelector(".container .left");
+  // wrapper.innerHTML = menuHtml;
 
   __hightlightMenu();
   __initListener();

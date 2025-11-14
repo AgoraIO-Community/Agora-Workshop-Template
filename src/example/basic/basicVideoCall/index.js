@@ -10,17 +10,21 @@ var currentCam = null;
 var mics = [];
 var cams = [];
 var remoteUsers = {};
-var options = getOptionsFromLocal();
+//var options = getOptionsFromLocal();
+var options = {};
 var curVideoProfile;
 var agoraConvoTaskID = "";
 
 // All keys
 // WARNING: Testing purposes only. Do NOT expose your RESTful API Key and Secret in production environment.
 let agora_AppID = null;
+let agora_Token = null; // 
 let llm_Aws_Bedrock_Key = null;
 let tts_Minimax_Key = null;
 let tts_Minimax_GroupID = null;
 let avatar_Akool_Key = null;
+let openai_Key = null;
+let groq_Key = null;
 
 // load safe config from server endpoint
 async function loadClientConfig() {
@@ -29,12 +33,22 @@ async function loadClientConfig() {
     if (!res.ok) throw new Error("Failed to fetch /config");
     const cfg = await res.json();
     agora_AppID = cfg.AGORA_APPID || null;
+    agora_Token = cfg.AGORA_TOKEN || null;
     // only set safe values client-side; do not set secrets here
     if (agora_AppID) options.appid = agora_AppID;
     llm_Aws_Bedrock_Key = cfg.LLM_AWS_BEDROCK_KEY || null;
+    openai_Key = cfg.OPENAI_KEY || null;
+    groq_Key = cfg.GROQ_KEY || null;
+
     tts_Minimax_Key = cfg.TTS_MINIMAX_KEY || null;
     tts_Minimax_GroupID = cfg.TTS_MINIMAX_GROUPID || null;
     avatar_Akool_Key = cfg.AVATAR_AKOOL_KEY || null;
+
+    options.token = cfg.AGORA_TOKEN || null;
+   
+    const inputElement = document.getElementById('token');
+    inputElement.value = options.token;
+
     console.log("Client config loaded");
   } catch (e) {
     message.error("Missing or invalid client config; see console for details.");
@@ -98,7 +112,10 @@ $("#step-create").click(function (e) {
 
 $("#step-join").click(async function (e) {
   try {
+    console.log("*** Join ****");
     options.channel = $("#channel").val();
+    
+    console.log("**** channel ***",options.channel);
     options.uid = Number($("#uid").val());
     const token = $("#token").val();
     if (token) {
@@ -107,7 +124,7 @@ $("#step-join").click(async function (e) {
       options.token = await agoraGetAppData(options);
     }
     await join();
-    setOptionsToLocal(options);
+    // setOptionsToLocal(options);
     addSuccessIcon("#step-join");
     message.success("Join channel success!");
     $("#step-join").attr("disabled", true);
@@ -132,7 +149,7 @@ $("#step-publish").click(async function (e) {
   $("#step-publish").attr("disabled", true);
   $("#mirror-check").attr("disabled", true);
   // agora content inspect start
-  agoraContentInspect(localTracks.videoTrack);
+  // agoraContentInspect(localTracks.videoTrack);
   // agora content inspect end ;
 });
 
@@ -362,37 +379,36 @@ $("#start-convo-ai").click(async function (e) {
       name: options.channel,
       properties: {
         channel: options.channel, // Agora Channel
-        token: "", // Agora token for ConvoAI Agent, not needed if app certificate is disabled
+        token: agora_Token, // Agora token for ConvoAI Agent, not needed if app certificate is disabled
         agent_rtc_uid: "10001", // AI agent user ID
         remote_rtc_uids: ["10000"], // List of remote user IDs to subscribe, use * to subscribe all users
         idle_timeout: 30, // Idle timeout in seconds
-        enable_string_uid: false, // Whether to enable string UID
+        //enable_string_uid: false, // Whether to enable string UID
         advanced_features: {
-          enable_aivad: false, // Enable intelligent interruption handling
+          enable_aivad: true, // Enable intelligent interruption handling
           enable_mllm: false, // Enable multimodal large language model
           enable_rtm: false, // Enable signaling service
         },
         asr: {
           language: "en-US", // ASR language, e.g., "en-US", "ja-JP", "zh-CN"
-          vendor: "ares", // ASR vendor
+          //vendor: "ares", // ASR vendor
         },
         llm: {
-          style: "bedrock",
-          url: "https://bedrock-runtime.ap-southeast-7.amazonaws.com/model/apac.amazon.nova-pro-v1:0/converse-stream",
-          api_key: llm_Aws_Bedrock_Key,
-          region: "ap-southeast-7",
-          model: "apac.amazon.nova-pro-v1:0",
+          url: "https://api.groq.com/openai/v1/chat/completions",
+          api_key: groq_Key,
           system_messages: [
             {
               role: "system",
               content:
-                "You are a helpful chat bot", // Write your system prompt here (e.g. you are a tour guide, you are a math teacher, etc.)
+                "You are a helpful chat bot. Keep answers short and concise. Only output plain text responses, without any markdown, HTML tags, or emojis. Do not include any formatting symbols. This is a voice-to-voice service.", // Write your system prompt here (e.g. you are a tour guide, you are a math teacher, etc.)
             },
           ],
-          greeting_message: "", // Do NOT set any greeting message
-          failure_message:
-            "Sorry, technical issues prevent me from responding right now.",
-          ignore_empty: true, // Whether to ignore empty user messages
+          greeting_message: "Hello, how are you?", // Do NOT set any greeting message
+          failure_message: "Sorry, technical issues prevent me from responding right now.",
+          //ignore_empty: true, // Whether to ignore empty user messages
+          params: {
+            model: "llama-3.3-70b-versatile"
+          }
         },
         tts: {
           vendor: "minimax",
@@ -420,15 +436,22 @@ $("#start-convo-ai").click(async function (e) {
           params: {
             api_key: avatar_Akool_Key,
             agora_uid: "10002",
+            agora_token: agora_Token,
             // agora_token: "avatar_rtc_token", // Optional: if Agora app certificate is enabled in the project, provide the token for the avatar here
-            avatar_id: "dvp_Sean_agora", // Available Avatar IDs: dvp_Sean_agora, dvp_Alinna_emotionsit_agora, dvp_Emma_agora, dvp_Dave_agora
+            //avatar_id: "dvp_Sean_agora", // Available Avatar IDs: dvp_Sean_agora, dvp_Alinna_emotionsit_agora, dvp_Emma_agora, dvp_Dave_agora
+            //avater_id: "water_animate_v2",
+            avatar_id: "dvp_Sean_agora",
           },
-        }
-        //,
-        // parameters: { 
+        },
+        parameters: { 
         //   data_channel: "rtm", // Agent data transmission through RTM channel or RTC data stream
         //   enable_error_messages: false  // Whether to enable error messages from the agent
-        // }
+        "silence_config" : {
+                  "timeout_ms": 10000,
+                  "action": "think",
+                  "content": "continue conversation"
+              } 
+        }
       },
     };
 
