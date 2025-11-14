@@ -79,7 +79,6 @@ $("#step-join").attr("disabled", true);
 $("#step-publish").attr("disabled", true);
 $("#step-subscribe").attr("disabled", true);
 $("#step-leave").attr("disabled", true);
-$("#remote-uid-select").val("");
 
 $(".mic-list").change(function (e) {
   switchMicrophone(this.value);
@@ -138,7 +137,7 @@ $("#step-publish").click(async function (e) {
 });
 
 $("#step-subscribe").click(function (e) {
-  const uid = $("#remote-uid-select").val();
+  const uid = 10002; // hardcoded remote UID
   const user = remoteUsers[uid];
   if (!user) {
     return message.error(`User:${uid} not found!`);
