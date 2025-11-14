@@ -122,7 +122,7 @@ $("#step-join").click(async function (e) {
     if (token) {
       options.token = token;
     } else {
-      options.token = await agoraGetAppData(options);
+      //options.token = await agoraGetAppData(options);
     }
     await join();
     // setOptionsToLocal(options);
@@ -380,7 +380,7 @@ $("#start-convo-ai").click(async function (e) {
       name: options.channel,
       properties: {
         channel: options.channel, // Agora Channel
-        token: agora_Token, // Agora token for ConvoAI Agent, not needed if app certificate is disabled
+        // token: agora_Token, // Agora token for ConvoAI Agent, not needed if app certificate is disabled
         agent_rtc_uid: "10001", // AI agent user ID
         remote_rtc_uids: ["10000"], // List of remote user IDs to subscribe, use * to subscribe all users
         idle_timeout: 30, // Idle timeout in seconds
@@ -437,7 +437,7 @@ $("#start-convo-ai").click(async function (e) {
           params: {
             api_key: avatar_Akool_Key,
             agora_uid: "10002",
-            agora_token: agora_Token,
+            // agora_token: agora_Token,
             // agora_token: "avatar_rtc_token", // Optional: if Agora app certificate is enabled in the project, provide the token for the avatar here
             //avatar_id: "dvp_Sean_agora", // Available Avatar IDs: dvp_Sean_agora, dvp_Alinna_emotionsit_agora, dvp_Emma_agora, dvp_Dave_agora
             //avater_id: "water_animate_v2",
